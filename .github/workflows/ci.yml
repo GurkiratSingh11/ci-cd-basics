@@ -16,3 +16,18 @@ jobs:
 
       - name: Build backend Docker image
         run: docker build -t ci-cd-backend ./backend
+
+      - name: Start backend container
+        run: docker run -d --name backend -p 3000:3000 ci-cd-backend
+
+      - name: Wait for server to be ready
+        run: sleep 3
+
+      - name: Health check
+        run: |
+          curl -f http://localhost:3000/api/health
+          echo ""
+
+      - name: Stop container
+        if: always()
+        run: docker stop backend || true
