@@ -9,6 +9,9 @@ on:
 jobs:
   build-backend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -31,3 +34,14 @@ jobs:
       - name: Stop container
         if: always()
         run: docker stop backend || true
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Tag and push image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          IMAGE=ghcr.io/${{ github.repository_owner }}/ci-cd-backend:latest
+          docker tag ci-cd-backend $IMAGE
+          docker push $IMAGE
