@@ -39,9 +39,10 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Tag and push image
+      - name: Tag and push image to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/ci-cd-backend:latest
-          docker tag ci-cd-backend $IMAGE
-          docker push $IMAGE
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=ghcr.io/${OWNER_LOWER}/ci-cd-backend:latest
+          docker tag ci-cd-backend "$IMAGE"
+          docker push "$IMAGE"
