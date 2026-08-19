@@ -1,0 +1,8 @@
+services:
+  backend:
+    image: ghcr.io/gurkiratsingh11/ci-cd-backend:latest
+    ports:
+      - target: 3000
+        published: "3000"
+        protocol: tcp
+        mode: host
