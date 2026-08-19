@@ -46,3 +46,28 @@ jobs:
           IMAGE=ghcr.io/${OWNER_LOWER}/ci-cd-backend:latest
           docker tag ci-cd-backend "$IMAGE"
           docker push "$IMAGE"
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build frontend Docker image
+        run: docker build -t ci-cd-frontend ./frontend
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Tag and push image to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=ghcr.io/${OWNER_LOWER}/ci-cd-frontend:latest
+          docker tag ci-cd-frontend "$IMAGE"
+          docker push "$IMAGE"
